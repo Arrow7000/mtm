@@ -10,6 +10,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="HierarchyTree.fs" />
+    <Compile Include="Search.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
