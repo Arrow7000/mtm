@@ -54,9 +54,6 @@ let makeTree (parentChildRows : (string * string) seq) =
         |> Seq.map fst
         |> Set.ofSeq
 
-    let nonParentsOnly =
-        Set.difference allChildren allParents
-
     /// Could be more than one root parent
     let rootParents =
         Set.difference allParents allChildren
@@ -65,7 +62,7 @@ let makeTree (parentChildRows : (string * string) seq) =
         let childrenOpt = Map.tryFind word parentChildRelationsMap
         match childrenOpt with
         | None -> Leaf word
-        | Some children -> Branch (word, Seq.map findAllDescendants children |> List.ofSeq)
+        | Some children -> Branch (word, Seq.map findAllDescendants children |> List.ofSeq |> List.distinct)
 
     rootParents
     |> Set.map findAllDescendants
