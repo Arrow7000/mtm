@@ -29,29 +29,37 @@ type SearchResultTree =
 
 (*
 We need to keep track of:
- a. how much of query string we've been able to match
+ a. what of query string we haven't been able to match yet
  b. marked target string so far
  c. the target string left
 *)
 
-
-/// Very much in progress
-let findInStr queryStr targetStr =
+/// Finds query string in target string.
+/// Returns the unmatched chars in query string and the marked/unmarked chars of the target string.
+let findInCharList queryStr targetStr =
     targetStr
     |> List.fold
-        (fun (coveredQueryStr,yetToDoQueryStr,markedString) targetStrChar ->
-            match yetToDoQueryStr with
-            | [] -> ()
-            | list -> ()
+        (fun (queryStrNotMatchedYet,markedString) targetStrChar ->
+            match queryStrNotMatchedYet with
+            | [] -> [], markedString @ [ Unmarked targetStrChar ]
+            | queryStrChar :: rest ->
+                if queryStrChar = targetStrChar then
+                    rest, markedString @ [ Marked targetStrChar ]
+                else
+                    rest, markedString @ [ Unmarked targetStrChar ])
+        (queryStr, List.empty)
 
-        )
-        ((List.empty,queryStr),List.empty)
 
 
+/// WIP
 let findInHierarchyTree queryStr (tree : HierarchyTree<string>) =
-    let rec traverser remainingQueryStr remainingTree =
-        match remainingTree with
-        | Leaf str -> ()
+    let rec traverser remainingQueryCharList remainingTree =
+        match remainingQueryCharList with
+        | [] -> remainingTree // 
+        | remainingQuery ->
+            match remainingTree with
+            | Leaf str ->
+                findInCharList remainingQueryCharList
 
 
-
+    traverser (Seq.toList queryStr) tree
