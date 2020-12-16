@@ -22,8 +22,8 @@ let printMarkedString (markedString : MarkedString) =
 
 type SearchResultTree =
     | ResultBranch of MarkedString * SearchResultTree list
-    | SuccessBranch of MarkedString
-    | NoResults
+    | SuccessLeaf of MarkedString
+    | NoResultLeaf
 
 
 
@@ -44,7 +44,7 @@ let findInCharList queryStr targetStr =
             match queryStrNotMatchedYet with
             | [] -> [], markedString @ [ Unmarked targetStrChar ]
             | queryStrChar :: rest as list ->
-                if queryStrChar = targetStrChar then
+                if queryStrChar.ToString().ToLowerInvariant() = targetStrChar.ToString().ToLowerInvariant() then
                     rest, markedString @ [ Marked targetStrChar ]
                 else
                     list, markedString @ [ Unmarked targetStrChar ])
@@ -59,10 +59,23 @@ let rec convertHierarchyToSearchResult (tree : HierarchyTree<string>) =
     match tree with
     | Leaf str ->
         let markedStr = Seq.toList str |> List.map Unmarked
-        SuccessBranch markedStr
+        SuccessLeaf markedStr
     | Branch (str, children) ->
         let markedStr = Seq.toList str |> List.map Unmarked
         ResultBranch (markedStr, List.map convertHierarchyToSearchResult children )
+
+
+let rec trimNoResults (searchResult : SearchResultTree) =
+    match searchResult with
+    | NoResultLeaf -> None
+    | SuccessLeaf str -> SuccessLeaf str |> Some
+    | ResultBranch (markedString, children) ->
+        let childResults =
+            children
+            |> List.choose trimNoResults
+        match childResults with
+        | [] -> None
+        | results -> ResultBranch (markedString,results) |> Some
 
 
 
@@ -81,8 +94,8 @@ let findInHierarchyTree queryStr (tree : HierarchyTree<string>) =
 
                 match queryCharsLeft with
                 | [] -> // this branch matches!
-                    SuccessBranch markedString
-                | _ -> NoResults // this branch doesn't match!
+                    SuccessLeaf markedString
+                | _ -> NoResultLeaf // this branch doesn't match!
             | Branch (str,children) ->
                 let targetCharList = Seq.toList str
                 let (queryCharsLeft,markedString) = findInCharList remainingQuery targetCharList
@@ -94,13 +107,14 @@ let findInHierarchyTree queryStr (tree : HierarchyTree<string>) =
                     let childrenResults =
                         List.map (traverser someLeft) children
                     match childrenResults with
-                    | [] -> NoResults
+                    | [] -> NoResultLeaf
                     | childrenResults -> ResultBranch (markedString, childrenResults)
 
     traverser (Seq.toList queryStr) tree
+    |> trimNoResults
 
 
 
 let findInHierarchyTrees queryStr (trees : HierarchyTree<string> list) =
     trees
-    |> List.map (findInHierarchyTree queryStr)
+    |> List.choose (findInHierarchyTree queryStr)
