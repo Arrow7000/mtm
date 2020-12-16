@@ -17,18 +17,6 @@ type HierarchyTree<'T> =
     | Branch of 'T * HierarchyTree<'T> list
     | Leaf of 'T
 
-    static member map (mapping : 'a -> 'b) =
-        function
-        | Leaf str -> Leaf (mapping str)
-        | Branch (str, children) -> Branch (mapping str, List.map (HierarchyTree<_>.map mapping) children)
-
-    static member bind (binder : 'a -> HierarchyTree<'a>) =
-        function
-        | Leaf str -> binder str
-        | Branch (str, children) -> Branch (str, List.map (HierarchyTree<_>.bind binder) children)
-
-
-
 
 
 

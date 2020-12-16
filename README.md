@@ -33,6 +33,6 @@ I make quite a lot of use of folds and recursive functions, which are often hard
 
 ## What I would have done differently
 
-I think the solution as it stands is ok. I think I'd have just avoided certain dead ends I took in the process of implementing, e.g.trying to construct the hierarchy tree in a pure, monadic way by folding through the list of parent-child relationships and rturning a slightly modified version of the final tree at each step. That turned out to be virtually unworkable, and certainly more complex than the simpler solution I eventually came up with.
+I think the solution as it stands is ok. I think I'd have just avoided certain dead ends I took in the process of implementing, e.g. trying to construct the hierarchy tree in a pure, monadic way by folding through the list of parent-child relationships and returning a slightly modified version of the final tree at each step. That turned out to be virtually unworkable, and certainly more complex than the simpler solution I eventually came up with.
 
 It also took me a while to figure out how to construct a search result tree with no 'dead' branches that don't contain a full match for the query string.
