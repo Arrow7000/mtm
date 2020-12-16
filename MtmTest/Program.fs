@@ -36,7 +36,7 @@ let main _ =
 
     let config =
         { defaultConfig with
-            bindings = [ HttpBinding.create HTTP Net.IPAddress.Any (uint16 4000) ] }
+            bindings = [ HttpBinding.create HTTP Net.IPAddress.Any (uint16 8080) ] }
 
     startWebServer config endpoint
 
