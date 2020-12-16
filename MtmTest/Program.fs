@@ -10,7 +10,7 @@ let main argv =
     File.ReadAllText "pairs.csv"
     |> parseCsv
     |> makeTree
-    |> findInHierarchyTrees "fghfghfghfghfghfghgf"
+    |> findInHierarchyTrees "medical shit"
     |> printfn "%A"
 
     0 // return an integer exit code

@@ -11,13 +11,21 @@ type MarkedString = SearchResultChar list
 
 
 let printMarkedString (markedString : MarkedString) =
-    markedString
-    |> List.fold
-        (fun strSoFar thisChunk ->
-            match thisChunk with
-            | Unmarked str -> strSoFar + string str
-            | Marked str -> strSoFar + (sprintf "<mark>%c</mark>" str)) // this marks every char, even adjacent ones, but not a big deal; can optimise later
-        ""
+    let (str,isMarked) =
+        markedString
+        |> List.fold
+            (fun (strSoFar,isMarked) thisChunk ->
+                if isMarked then
+                    match thisChunk with
+                    | Marked str -> strSoFar + string str, true
+                    | Unmarked str -> strSoFar + (sprintf "</mark>%c" str), false
+                else
+                    match thisChunk with
+                    | Unmarked str -> strSoFar + string str, false
+                    | Marked str -> strSoFar + (sprintf "<mark>%c" str), true
+            )
+            ("", false)
+    str + (if isMarked then "</mark>" else "")
 
 
 type SearchResultTree =
@@ -65,20 +73,27 @@ let rec convertHierarchyToSearchResult (tree : HierarchyTree<string>) =
         ResultBranch (markedStr, List.map convertHierarchyToSearchResult children )
 
 
+
+
+
+
+
+type ResponseTree =
+    | ParentResult of string * ResponseTree list
+    | ChildResult of string
+
+
 let rec trimNoResults (searchResult : SearchResultTree) =
     match searchResult with
     | NoResultLeaf -> None
-    | SuccessLeaf str -> SuccessLeaf str |> Some
+    | SuccessLeaf str -> printMarkedString str |> ChildResult |> Some
     | ResultBranch (markedString, children) ->
         let childResults =
             children
             |> List.choose trimNoResults
         match childResults with
         | [] -> None
-        | results -> ResultBranch (markedString,results) |> Some
-
-
-
+        | results -> ParentResult (printMarkedString markedString,results) |> Some
 
 
 
